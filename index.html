@@ -5,36 +5,665 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Autodiagnóstico Empresarial Exprés</title>
 <style>
-  :root{
-    --azul-oscuro:#1e3a8a;
-    --naranja:#ea580c;
-    --gris-oscuro:#1e293b;
-    --fondo-claro:#ffffff;
-    --gris-suave:#f8f8f8;
-    --borde:#e5e7eb;
-    --danger:#ef4444;
-    --yellow:#f59e0b;
-    --green:#16a34a;
-  }
-  *{box-sizing:border-box}
-  body{
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background:var(--fondo-claro);
-    color:var(--gris-oscuro);
-    margin:0;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
+:root{
+--azul-oscuro:#1e3a8a;
+--naranja:#ea580c;
+--gris-oscuro:#1e293b;
+--fondo-claro:#ffffff;
+--gris-suave:#f8f8f8;
+--borde:#e5e7eb;
+--danger:#ef4444;
+--yellow:#f59e0b;
+--green:#16a34a;
+}
+*{box-sizing:border-box}
+body{
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+background:var(--fondo-claro);
+color:var(--gris-oscuro);
+margin:0;
+-webkit-font-smoothing:antialiased;
+-moz-osx-font-smoothing:grayscale;
+}
+/* Fixed header with progress */
+header{
+position:fixed; top:0; left:0; right:0;
+background:var(--azul-oscuro); color:white; padding:14px 18px; z-index:1100;
+box-shadow:0 4px 18px rgba(12,24,64,0.12);
+/* text-align: center; -- CENTRADO MOVIDO A .header-content */
+}
+/* NUEVO: Contenedor para alinear el logo y el título */
+.header-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.header-logo {
+    height: 24px; /* Tamaño del logo ajustado al texto del título */
+    width: auto;
+}
+header .title{font-size:18px;margin:0;font-weight:600}
+header .subtitle{font-size:13px;opacity:0.95;margin:6px 0 0; text-align: center;} /* Centrado del subtítulo */
+.progress-wrap{margin-top:10px}
+.progress-track{height:8px;background:var(--borde);border-radius:6px;overflow:hidden}
+.progress-bar{height:8px;width:0%;background:linear-gradient(90deg,var(--naranja),#ffb86b);transition:width .28s ease}
+/* layout */
+main{max-width:880px;margin:150px auto 90px;padding:18px}
+.card{background:var(--fondo-claro);border-radius:12px;border:1px solid var(--borde);padding:18px;margin-bottom:16px;box-shadow:0 6px 20px rgba(12,24,64,0.04)}
+.center{text-align:center}
+.muted{color:#64748b;font-size:14px}
+.big-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.choice-btn{min-width:220px;padding:14px 18px;border-radius:12px;border:2px solid rgba(255,255,255,0.06);cursor:pointer;background:#fff;color:var(--azul-oscuro);font-weight:600;box-shadow:0 6px 18px rgba(16,24,64,0.06)}
+.choice-btn:hover{transform:translateY(-4px)}
+.choice-selected{outline:4px solid rgba(30,58,138,0.08)}
+/* grid & fields */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:13px;color:var(--gris-oscuro);margin-bottom:6px}
+input[type=text], input[type=email], select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--borde);background:#fff}
+.full{grid-column:1/-1}
+/* question */
+.section-label{font-weight:700;color:var(--azul-oscuro);font-size:14px;margin-bottom:8px}
+.question-text{font-size:16px;margin:0}
+.options{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.opt-btn{border-radius:10px;border:1px solid var(--borde);padding:12px;text-align:left;background:white;cursor:pointer;transition:all .12s ease;font-size:15px}
+.opt-btn:hover{transform:translateY(-2px)}
+.opt-selected-red{background:var(--danger);color:white;border-color:var(--danger)}
+.opt-selected-yellow{background:var(--yellow);color:#0b1220;border-color:var(--yellow)}
+.opt-selected-green{background:var(--green);color:white;border-color:var(--green)}
+/* small controls */
+.controls{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.btn{padding:10px 14px;border-radius:10px;border:none;background:var(--azul-oscuro);color:white;cursor:pointer}
+.btn.secondary{background:transparent;border:1px solid var(--borde);color:var(--gris-oscuro)}
+.hint{font-size:13px;color:#475569;margin-top:10px}
+/* review table */
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{padding:10px;border-bottom:1px solid #f1f5f9;text-align:left;font-size:14px}
+th{background:#fbfdff;font-weight:600;color:var(--azul-oscuro)}
+.edit-link{background:transparent;border:1px solid var(--borde);padding:6px 8px;border-radius:8px;cursor:pointer}
+/* results */
+.results{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.res-box{flex:1;padding:12px;border-radius:10px}
+.res-red{background:rgba(255,229,230,0.9);color:var(--danger);border:1px solid rgba(255,200,200,0.9)}
+.res-yellow{background:rgba(255,250,235,0.95);color:var(--yellow);border:1px solid rgba(255,240,200,0.9)}
+.res-green{background:rgba(236,253,245,0.95);color:var(--green);border:1px solid rgba(200,250,220,0.9)}
+.weak-item{margin-top:8px;padding:10px;border-radius:8px;background:#fff;border:1px solid var(--borde)}
+footer{max-width:880px;margin:10px auto 60px;padding:8px 18px;font-size:13px;color:#64748b;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<div class="header-content">
+  <img src="https://i.imgur.com/X4oDAAW.png" alt="Logo" class="header-logo">
+  <div class="title">Autodiagnóstico Empresarial Exprés</div>
+</div>
+<div class="subtitle">Elegí el tipo de evaluación y completá el formulario — Resultado automático y PDF</div>
+<div class="progress-wrap">
+<div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+</div>
+</header>
+<main id="main">
+<section class="card center" id="startCard">
+<h2 style="color:var(--azul-oscuro);margin:0">Comenzar diagnóstico</h2>
+<p class="muted">Seleccioná si tu negocio tiene equipo o sos una persona sola. Esto ajusta las preguntas.</p>
+<div class="big-cta">
+<button id="btnHaveTeam" class="choice-btn"> 🧑 ‍ 💼 Tengo equipo (2 o más personas)</button>
+<button id="btnSolo" class="choice-btn"> 👤 No tengo equipo (1 sola persona)</button>
+</div>
+<div class="hint">Podés volver a esta pantalla en cualquier momento con el botón "Reiniciar".</div>
+</section>
+<section class="card" id="dataCard" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div>
+<strong style="font-size:16px;color:var(--azul-oscuro)">Datos iniciales (obligatorios)</strong>
+<div class="muted">Estos datos personalizarán tu informe. Teléfono: opcional.</div>
+</div>
+<div><button id="btnBackToStart" class="btn secondary">Reiniciar</button></div>
+</div>
+<form id="dataForm" style="margin-top:12px">
+<div class="grid">
+<div>
+<label>Nombre y apellido *</label>
+<input id="fieldName" type="text" placeholder="Ej: Juan Pérez" required>
+</div>
+<div>
+<label>Empresa / Emprendimiento *</label>
+<input id="fieldCompany" type="text" placeholder="Ej: Soluciones Digitales S.A." required>
+</div>
+<div>
+<label>Rubro / actividad *</label>
+<input id="fieldRubro" type="text" placeholder="Ej: Desarrollo de Software" required>
+</div>
+<div>
+<label>Años de funcionamiento *</label>
+<select id="fieldYears" required>
+<option>Menos de 1 año</option>
+<option>1 a 3 años</option>
+<option>3 a 5 años</option>
+<option>Más de 5 años</option>
+</select>
+</div>
+<div>
+<label>Cantidad de personas (incluyéndote) *</label>
+<select id="fieldTeamSize" required>
+<option>Solo yo</option>
+<option>2 a 5</option>
+<option>6 a 10</option>
+<option>Más de 10</option>
+</select>
+</div>
+<div>
+<label>Correo electrónico *</label>
+<input id="fieldEmail" type="email" placeholder="Ej: juan.perez@ejemplo.com" required>
+</div>
+<div class="full">
+<label>Número de celular (opcional)</label>
+<input id="fieldPhone" type="text" placeholder="Ej: +54 9 11 5555 1234 (Opcional)">
+</div>
+</div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px">
+<button id="btnCancelData" type="button" class="btn secondary">Volver</button>
+<button id="btnStartQuestions" type="button" class="btn">Continuar</button>
+</div>
+</form>
+</section>
+<section class="card" id="questionCard" style="display:none">
+<div class="section-label" id="sectionLabel">Sección</div>
+<div class="question-text" id="questionText">Pregunta</div>
+<div class="options" id="optionsWrap"></div>
+<div class="controls">
+<button id="btnPrev" class="btn secondary" style="display:none">Anterior</button>
+<div style="display:flex;gap:8px">
+<button id="btnReview" class="btn secondary">Revisar respuestas</button>
+<button id="btnNextManual" class="btn" style="display:none">Siguiente</button>
+</div>
+</div>
+<div class="hint">La selección avanza automáticamente. Puedes usar "Anterior" si querés cambiar.</div>
+</section>
+<section class="card" id="reviewCard" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div>
+<strong style="font-size:16px;color:var(--azul-oscuro)">Revisión de respuestas</strong>
+<div class="muted">Editá cualquier respuesta antes de confirmar el diagnóstico.</div>
+</div>
+<div>
+<button id="btnBackToQuestions" class="btn secondary">Volver a preguntas</button>
+</div>
+</div>
+<div style="margin-top:12px;overflow:auto">
+<table id="reviewTable">
+<thead><tr><th>Sección</th><th>Pregunta</th><th>Respuesta</th><th>Editar</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px">
+<button id="btnConfirm" class="btn">Confirmar y ver resultados</button>
+</div>
+</section>
+<section class="card" id="resultsCard" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div>
+<strong style="font-size:16px;color:var(--azul-oscuro)">Resultados del diagnóstico</strong>
+<div class="muted">Semáforos por sección y recomendaciones accionables</div>
+</div>
+<div>
+<button id="btnDownloadPdf" class="btn">Descargar Informe PDF</button>
+</div>
+</div>
+<div class="results" id="resultsBoxes" style="margin-top:14px"></div>
+<div style="margin-top:12px">
+<strong>Semáforo general de la empresa</strong>
+<div id="generalBox" style="margin-top:8px"></div>
+</div>
+<div style="margin-top:14px">
+<strong>Principales puntos débiles detectados</strong>
+<div class="muted">Hasta 4 por sección — se muestran solo las que tengan respuesta ≤ 2</div>
+<div id="weakPoints" style="margin-top:10px"></div>
+</div>
+<div style="margin-top:16px">
+<strong>Interpretación resumida y plan de acción</strong>
+<p id="combinedText" class="muted" style="margin-top:8px"></p>
+</div>
+</section>
+</main>
+<footer>© Salto Consultora — Acompañamos personas y equipos a gestionar mejor.</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ======= CONFIG & DATA ======= */
+/* Questions for both flows.
+We'll create two second-section sets: one for 'team' (Equipo),
+one for 'solo' (Personal / Coaching).
+Both flows share the same Estructura questions.
+*/
+// Estructura (8)
+const ESTRUCTURA = [
+{id:'E1', text:'Tengo un sistema claro de control de ingresos y egresos.'},
+{id:'E2', text:'Conozco mensualmente la rentabilidad por producto/servicio.'},
+{id:'E3', text:'Mis precios están definidos en función de costos y margen.'},
+{id:'E4', text:'Tengo procesos documentados y estandarizados para tareas clave.'},
+{id:'E5', text:'Realizo seguimiento del flujo de fondos con regularidad.'},
+{id:'E6', text:'Uso indicadores (KPI) para medir resultados.'},
+{id:'E7', text:'Tengo planificación y metas para los próximos 6-12 meses.'},
+{id:'E8', text:'Gestiono stock/compras y costos operativos con control.'}
+];
+// Equipo (8)
+const EQUIPO = [
+{id:'T1', text:'El equipo conoce claramente sus responsabilidades.'},
+{id:'T2', text:'La comunicación interna es abierta y respetuosa.'},
+{id:'T3', text:'Se realizan reuniones efectivas de seguimiento.'},
+{id:'T4', text:'Los conflictos se abordan de forma constructiva.'},
+{id:'T5', text:'Percibo compromiso y motivación en el equipo.'},
+{id:'T6', text:'Se reconoce y valora el buen desempeño.'},
+{id:'T7', text:'Se promueve el aprendizaje y desarrollo del personal.'},
+{id:'T8', text:'El liderazgo facilita la toma de decisiones compartida.'}
+];
+// Solo / Personal (8) - coaching-oriented
+const SOLO = [
+{id:'S1', text:'Tengo rutinas claras que me ayudan a organizar el trabajo diario.'},
+{id:'S2', text:'Cumplo los compromisos y objetivos personales que me propongo.'},
+{id:'S3', text:'Mantengo equilibrio entre trabajo, energía y bienestar.'},
+{id:'S4', text:'Soy capaz de priorizar lo importante frente a lo urgente.'},
+{id:'S5', text:'Pido ayuda o delego tareas cuando lo necesito.'},
+{id:'S6', text:'Busco aprendizaje y desarrollo de forma planificada.'},
+{id:'S7', text:'Gestiono las emociones frente a la incertidumbre o el estrés.'},
+{id:'S8', text:'Tengo claridad sobre mi propuesta de valor y objetivos a medio plazo.'}
+];
+// Choices: label, value, selected color class
+const CHOICES = [
+{label:'1 - Nunca', value:1, colorClass:'opt-selected-red'},
+{label:'2 - A veces', value:2, colorClass:'opt-selected-yellow'},
+{label:'3 - Frecuentemente', value:3, colorClass:'opt-selected-green'},
+{label:'4 - Siempre', value:4, colorClass:'opt-selected-green'}
+];
+// Recommendations map (actionable)
+const RECOMMENDATIONS = {
+E1: "Implementá un registro diario de ingresos y egresos (planilla simple) y revisalo quincenalmente.",
+E2: "Calculá rentabilidad por producto/servicio mensualmente; priorizá los más rentables.",
+E3: "Revisá costos directos e indirectos y definí un margen objetivo por línea.",
+E4: "Documentá los procesos críticos en pasos simples y asigná responsables.",
+E5: "Realizá seguimiento del flujo de fondos con regularidad.",
+E6: "Definí 3 KPIs principales (ventas, margen, rotación) y revisalos mensualmente.",
+E7: "Armá metas trimestrales con acciones y responsables.",
+E8: "Organizá controles de stock y ciclos de compra con responsables asignados.",
+T1: "Clarificá roles con descripciones simples y conversalas en una reunión breve.",
+T2: "Instaurá un espacio semanal de comunicación y normas claras de respeto.",
+T3: "Estructurá reuniones cortas con agenda y responsabilidades de seguimiento.",
+T4: "Implementá una pauta para gestionar conflictos: detección, reunión y plan.",
+T5: "Conversá sobre objetivos y conectalos con reconocimientos concretos.",
+T6: "Diseñá prácticas de reconocimiento regular (punto semanal o mensual).",
+T7: "Planificá formación trimestral con objetivos de mejora claros.",
+T8: "Promové la delegación con acompañamiento y límites claros de decisión.",
+S1: "Diseñá una rutina diaria con bloques de trabajo y pausas planificadas.",
+S2: "Establecé micro-metas semanales y hacé seguimiento personal.",
+S3: "Implementá prácticas de autocuidado: horarios, sueño y desconexión.",
+S4: "Usá la matriz 'urgente-importante' para priorizar tareas clave.",
+S5: "Creá una red de apoyo (freelancers/amigos/proveedores) y delegá tareas operativas.",
+S6: "Reservá tiempo mensual para formación con objetivos concretos.",
+S7: "Aprendé técnicas breves de regulación emocional (respiración, pausa).",
+S8: "Definí tu propuesta de valor en 2 frases y revisala cada trimestre."
+};
+/* ======= App State ======= */
+let flowType = null; // 'team' or 'solo'
+let allQuestions = []; // will be sequential: estructura then equipo/solo
+let currentIndex = 0;
+let answers = {}; // id -> value (1..4)
+let user = {name:'', company:'', rubro:'', years:'', teamSize:'', email:'', phone:''};
+let lastResult = null;
+/* ======= DOM refs ======= */
+const startCard = document.getElementById('startCard');
+const dataCard = document.getElementById('dataCard');
+const questionCard = document.getElementById('questionCard');
+const reviewCard = document.getElementById('reviewCard');
+const resultsCard = document.getElementById('resultsCard');
+const btnHaveTeam = document.getElementById('btnHaveTeam');
+const btnSolo = document.getElementById('btnSolo');
+const btnBackToStart = document.getElementById('btnBackToStart');
+const btnStartQuestions = document.getElementById('btnStartQuestions');
+const btnCancelData = document.getElementById('btnCancelData');
+const sectionLabel = document.getElementById('sectionLabel');
+const questionText = document.getElementById('questionText');
+const optionsWrap = document.getElementById('optionsWrap');
+const btnPrev = document.getElementById('btnPrev');
+const btnReview = document.getElementById('btnReview');
+const btnNextManual = document.getElementById('btnNextManual');
+const reviewTableBody = document.querySelector('#reviewTable tbody');
+const btnBackToQuestions = document.getElementById('btnBackToQuestions');
+const btnConfirm = document.getElementById('btnConfirm');
+const resultsBoxes = document.getElementById('resultsBoxes');
+const generalBox = document.getElementById('generalBox');
+const weakPointsDiv = document.getElementById('weakPoints');
+const combinedTextP = document.getElementById('combinedText');
+const btnDownloadPdf = document.getElementById('btnDownloadPdf');
+const progressBar = document.getElementById('progressBar');
+/* ======= Event bindings: start flow ======= */
+function handleStartClick(type, button) {
+    flowType = type;
+    // Remueve 'choice-selected' de ambos, añade al actual (solo visual)
+    btnHaveTeam.classList.remove('choice-selected');
+    btnSolo.classList.remove('choice-selected');
+    button.classList.add('choice-selected');
+    
+    // Oculta la tarjeta de inicio inmediatamente
+    startCard.style.display = 'none';
+    
+    // Muestra la tarjeta de datos y pre-carga
+    showDataCard();
+}
 
-  /* Fixed header with progress */
-  header{
-    position:fixed; top:0; left:0; right:0;
-    background:var(--azul-oscuro); color:white; padding:14px 18px; z-index:1100;
-    box-shadow:0 4px 18px rgba(12,24,64,0.12);
-  }
-  header .title{font-size:18px;margin:0;font-weight:600}
-  header .subtitle{font-size:13px;opacity:0.95;margin:6px 0 0}
-  .progress-wrap{margin-top:10px}
+btnHaveTeam.addEventListener('click', (e) => handleStartClick('team', e.currentTarget));
+btnSolo.addEventListener('click', (e) => handleStartClick('solo', e.currentTarget));
+btnBackToStart.addEventListener('click', ()=> { location.reload(); });
+
+function showDataCard(){
+// prefill team size depending on flow
+document.getElementById('fieldTeamSize').value = flowType==='team' ? '2 a 5' : 'Solo yo';
+dataCard.style.display='block';
+// ensure progress 0
+updateProgressBar();
+}
+btnCancelData.addEventListener('click', ()=> {
+dataCard.style.display='none';
+startCard.style.display='block';
+flowType = null;
+updateProgressBar();
+});
+btnStartQuestions.addEventListener('click', ()=> {
+// validate required fields
+const name = document.getElementById('fieldName').value.trim();
+const company = document.getElementById('fieldCompany').value.trim();
+const rubro = document.getElementById('fieldRubro').value.trim();
+const years = document.getElementById('fieldYears').value;
+const teamSize = document.getElementById('fieldTeamSize').value;
+const email = document.getElementById('fieldEmail').value.trim();
+if(!name || !company || !rubro || !years || !teamSize || !email){
+alert('Por favor completá todos los campos obligatorios antes de continuar.');
+return;
+}
+user = {name, company, rubro, years, teamSize, email, phone: document.getElementById('fieldPhone').value.trim()};
+dataCard.style.display='none';
+prepareQuestionsAndStart();
+});
+/* ===== prepare questions in sequence ===== */
+function prepareQuestionsAndStart(){
+// structure first
+allQuestions = ESTRUCTURA.slice();
+if(flowType==='team') allQuestions = allQuestions.concat(EQUIPO);
+else allQuestions = allQuestions.concat(SOLO);
+currentIndex = 0; answers = {};
+questionCard.style.display='block';
+renderCurrentQuestion();
+}
+/* ===== render question ===== */
+function renderCurrentQuestion(){
+const q = allQuestions[currentIndex];
+const sectionTitle = currentIndex < ESTRUCTURA.length ? ' 🔹 Sección: Estructura y Gestión' : (flowType==='team' ? ' 🔸 Sección: Liderazgo y Equipo' : ' 🔸 Sección: Dimensión Personal');
+sectionLabel.textContent = sectionTitle;
+questionText.textContent = `${currentIndex+1}. ${q.text}`;
+optionsWrap.innerHTML = '';
+// produce buttons
+CHOICES.forEach(choice=>{
+const btn = document.createElement('button');
+btn.className = 'opt-btn';
+btn.textContent = choice.label;
+// preselected?
+if(answers[q.id] && answers[q.id] === choice.value){
+btn.classList.add(choice.colorClass);
+}
+btn.onclick = ()=> {
+// set answer
+answers[q.id] = choice.value;
+// visual marking
+[...optionsWrap.children].forEach(c=> c.className = 'opt-btn');
+btn.classList.add(choice.colorClass);
+// update progress
+updateProgressBar();
+// auto advance after short delay
+setTimeout(()=> {
+if(currentIndex < allQuestions.length - 1){
+currentIndex++;
+renderCurrentQuestion();
+} else {
+// finished -> go to review
+goToReview();
+}
+}, 380);
+};
+optionsWrap.appendChild(btn);
+});
+// prev visibility
+document.getElementById('btnPrev').style.display = currentIndex > 0 ? 'inline-block' : 'none';
+}
+/* prev button */
+btnPrev.addEventListener('click', ()=> {
+if(currentIndex > 0) {
+currentIndex--;
+renderCurrentQuestion();
+}
+});
+/* manual 'review' */
+btnReview.addEventListener('click', ()=> goToReview());
+btnNextManual.addEventListener('click', ()=> {
+if(currentIndex < allQuestions.length - 1) { currentIndex++; renderCurrentQuestion(); }
+});
+/* ===== Review screen ===== */
+function goToReview(){
+questionCard.style.display='none';
+reviewCard.style.display='block';
+populateReviewTable();
+}
+function populateReviewTable(){
+reviewTableBody.innerHTML = '';
+allQuestions.forEach((q,i)=>{
+const tr = document.createElement('tr');
+const secTd = document.createElement('td'); secTd.textContent = (i < ESTRUCTURA.length) ? 'Estructura' : (flowType==='team' ? 'Equipo' : 'Personal');
+const qTd = document.createElement('td'); qTd.textContent = q.text;
+const valTd = document.createElement('td'); valTd.textContent = answers[q.id] ? `${answers[q.id]} — ${labelFor(answers[q.id])}` : 'Sin responder';
+const editTd = document.createElement('td');
+const editBtn = document.createElement('button'); editBtn.className='edit-link'; editBtn.textContent='Editar';
+editBtn.onclick = ()=> {
+// go to question index
+reviewCard.style.display='none';
+questionCard.style.display='block';
+currentIndex = i;
+renderCurrentQuestion();
+};
+editTd.appendChild(editBtn);
+tr.appendChild(secTd); tr.appendChild(qTd); tr.appendChild(valTd); tr.appendChild(editTd);
+reviewTableBody.appendChild(tr);
+});
+}
+/* back from review */
+btnBackToQuestions.addEventListener('click', ()=> {
+reviewCard.style.display='none';
+questionCard.style.display='block';
+});
+/* confirm -> compute results */
+btnConfirm.addEventListener('click', ()=> {
+// ensure at least something answered
+// require all questions answered before confirming
+const unanswered = allQuestions.filter(q=> !answers[q.id]);
+if(unanswered.length){
+if(!confirm('Hay preguntas sin responder. ¿Querés continuar igual? (recomendado: responder todo)')) {
+return;
+}
+}
+reviewCard.style.display='none';
+showResults();
+});
+/* ===== Utils ===== */
+function labelFor(val){
+if(!val) return '';
+if(val===1) return 'Nunca';
+if(val===2) return 'A veces';
+if(val===3) return 'Frecuentemente';
+if(val===4) return 'Siempre';
+return '';
+}
+function updateProgressBar(){
+const answered = Object.keys(answers).length;
+const pct = Math.round((answered / allQuestions.length) * 100) || 0;
+progressBar.style.width = pct + '%';
+}
+/* ===== Results computation & rendering ===== */
+function computeSection(sectionArray){
+const items = sectionArray;
+let total=0, count=0;
+items.forEach(q=>{
+const v = answers[q.id];
+if(v && !isNaN(v)){ total += Number(v); count++; }
+});
+const max = items.length * 4;
+const pct = count===0 ? 0 : (total / max); // 0..1
+return {items, total, max, pct, count};
+}
+function mapSemaphore(pct){
+if(pct <= 0.45) return {color:'red', label:'Zona ROJA'};
+if(pct <= 0.75) return {color:'yellow', label:'Zona AMARILLA'};
+return {color:'green', label:'Zona VERDE'};
+}
+function showResults(){
+// compute
+const scE = computeSection(ESTRUCTURA);
+const scOther = computeSection(flowType==='team' ? EQUIPO : SOLO);
+const semE = mapSemaphore(scE.pct);
+const semO = mapSemaphore(scOther.pct);
+const overallPct = (scE.pct + scOther.pct) / 2;
+const semOverall = mapSemaphore(overallPct);
+// render boxes
+resultsBoxes.innerHTML = '';
+const boxE = document.createElement('div'); boxE.className='res-box ' + (semE.color==='red'?'res-red':semE.color==='yellow'?'res-yellow':'res-green');
+boxE.innerHTML = `<strong>Estructura</strong><div style="margin-top:8px;font-weight:700">${semE.label}</div>
+<div class="muted" style="margin-top:8px">Puntaje: ${scE.total} / ${scE.max} (${Math.round(scE.pct*100)}%)</div>`;
+const titleOther = flowType==='team' ? 'Equipo' : 'Dimensión Personal';
+const boxO = document.createElement('div'); boxO.className='res-box ' + (semO.color==='red'?'res-red':semO.color==='yellow'?'res-yellow':'res-green');
+boxO.innerHTML = `<strong>${titleOther}</strong><div style="margin-top:8px;font-weight:700">${semO.label}</div>
+<div class="muted" style="margin-top:8px">Puntaje: ${scOther.total} / ${scOther.max} (${Math.round(scOther.pct*100)}%)</div>`;
+resultsBoxes.appendChild(boxE); resultsBoxes.appendChild(boxO);
+// general
+generalBox.innerHTML = `<div class="res-box ${semOverall.color==='red'?'res-red':semOverall.color==='yellow'?'res-yellow':'res-green'}" style="display:inline-block;padding:12px;border-radius:8px">
+<strong>Resultado general: ${semOverall.label}</strong>
+<div class="muted" style="margin-top:6px">Promedio entre Estructura y ${titleOther} (${Math.round(overallPct*100)}%)</div>
+</div>`;
+// weak points - up to 4 per section where value <=2
+weakPointsDiv.innerHTML = '';
+function addWeak(sectionName, sc, items, prefix){
+const candidates = items.map(q=>({id:q.id, text:q.text, val:answers[q.id] || 0}))
+.filter(x=> x.val>0 && x.val<=2).sort((a,b)=> a.val - b.val).slice(0,4);
+if(candidates.length===0) return;
+const h = document.createElement('div'); h.style.marginTop='10px';
+h.innerHTML = `<strong style="display:block">${sectionName} — Puntos débiles y acciones</strong>`;
+candidates.forEach(c=>{
+const div = document.createElement('div'); div.className='weak-item';
+const rec = RECOMMENDATIONS[c.id] || 'Sugerencia: definí pasos concretos a corto plazo.';
+div.innerHTML = `<div style="font-weight:600">${c.text} — <span style="color:#475569;font-weight:500">${labelFor(c.val)}</span></div>
+<div style="margin-top:6px;color:#334155">${rec}</div>`;
+h.appendChild(div);
+});
+weakPointsDiv.appendChild(h);
+}
+addWeak('Estructura', scE, ESTRUCTURA, 'E');
+addWeak(titleOther, scOther, (flowType==='team'?EQUIPO:SOLO), 'O');
+// combined interpretation (simple rules)
+let combined = '';
+if(semE.color==='red' && semO.color==='red') combined = 'Alerta: Estructura y Equipo/Personal requieren intervención inmediata. Recomendado: plan de 90 días con prioridades claras.';
+else if(semE.color==='red' && semO.color!=='red') combined = 'Priorizar acciones sobre estructura (controles y procesos). Aprovechá lo positivo del equipo/personal para implementar cambios.';
+else if(semE.color!=='red' && semO.color==='red') combined = 'La estructura está en camino, pero foco en personas/gestión personal es necesario: comunicación, reconocimiento y soporte.';
+else if(semE.color==='green' && semO.color==='green') combined = 'Muy bien: estructura y personas en buen estado. Enfocate en optimización e innovación.';
+else combined = 'Resultado mixto: priorizá según urgencia y planificá revisiones a 30/60/90 días.';
+combinedTextP.textContent = combined;
+// save lastResult
+lastResult = {scE, scOther, semE, semO, semOverall, combined, titleOther};
+// show results card
+questionCard.style.display='none';
+reviewCard.style.display='none';
+resultsCard.style.display='block';
+// scroll into view
+resultsCard.scrollIntoView({behavior:'smooth'});
+}
+/* ===== PDF generation (jsPDF) ===== */
+async function generatePDFandDownload(){
+if(!lastResult){ alert('Generá primero el resultado.'); return; }
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF({unit:'pt', format:'a4'});
+const left = 40;
+let y = 50;
+// Header
+doc.setFontSize(16); doc.setTextColor(20,34,70);
+doc.text('Informe — Autodiagnóstico Empresarial Exprés', left, y); y+=18;
+doc.setFontSize(10); doc.setTextColor(90);
+doc.text(`Nombre: ${user.name}`, left, y); y+=14;
+doc.text(`Empresa: ${user.company} — Rubro: ${user.rubro}`, left, y); y+=14;
+doc.text(`Años: ${user.years} • Equipo: ${user.teamSize}`, left, y); y+=16;
+doc.setDrawColor(220); doc.line(left, y, 555, y); y+=14;
+// Estructura
+doc.setFontSize(12); doc.setTextColor(20,34,70);
+doc.text('Estructura y Gestión', left, y); y+=14;
+doc.setFontSize(10); doc.setTextColor(80);
+doc.text(`${lastResult.semE.label} — Puntaje: ${lastResult.scE.total} / ${lastResult.scE.max}`, left, y); y+=14;
+// Weak Estructura
+const weakE = lastResult.scE.items.map(q=>({id:q.id, val: answers[q.id]||0, text:q.text})).filter(x=> x.val>0 && x.val<=2).sort((a,b)=> a.val-b.val).slice(0,4);
+if(weakE.length){
+doc.setFontSize(11); doc.setTextColor(20,34,70);
+doc.text('Puntos débiles (Estructura):', left, y); y+=12;
+doc.setFontSize(10); doc.setTextColor(70);
+weakE.forEach(w=>{
+const rec = RECOMMENDATIONS[w.id] || 'Definir acción inmediata.';
+const lines = doc.splitTextToSize(`- ${w.text}\nRecomendación: ${rec}`, 500);
+doc.text(lines, left, y); y += lines.length*12 + 6;
+});
+} else {
+doc.setFontSize(10); doc.setTextColor(70);
+doc.text('No se detectaron debilidades prioritarias en Estructura.', left, y); y+=18;
+}
+// Equipo o Personal
+doc.setFontSize(12); doc.setTextColor(20,34,70);
+doc.text(`${lastResult.titleOther}`, left, y); y+=14;
+doc.setFontSize(10); doc.setTextColor(80);
+doc.text(`${lastResult.semO.label} — Puntaje: ${lastResult.scOther.total} / ${lastResult.scOther.max}`, left, y); y+=14;
+const weakO = lastResult.scOther.items.map(q=>({id:q.id,val:answers[q.id]||0,text:q.text})).filter(x=> x.val>0 && x.val<=2).sort((a,b)=> a.val-b.val).slice(0,4);
+if(weakO.length){
+doc.setFontSize(11); doc.setTextColor(20,34,70);
+doc.text(`Puntos débiles (${lastResult.titleOther}):`, left, y); y+=12;
+doc.setFontSize(10); doc.setTextColor(70);
+weakO.forEach(w=>{
+const rec = RECOMMENDATIONS[w.id] || 'Definir acción inmediata.';
+const lines = doc.splitTextToSize(`- ${w.text}\nRecomendación: ${rec}`, 500);
+doc.text(lines, left, y); y += lines.length*12 + 6;
+});
+} else {
+doc.setFontSize(10); doc.setTextColor(70);
+doc.text(`No se detectaron debilidades prioritarias en ${lastResult.titleOther}.`, left, y); y+=18;
+}
+// Combined
+doc.setFontSize(12); doc.setTextColor(20,34,70);
+doc.text('Interpretación combinada y plan de acción', left, y); y+=14;
+doc.setFontSize(10); doc.setTextColor(70);
+const combLines = doc.splitTextToSize(lastResult.combined, 500);
+doc.text(combLines, left, y); y += combLines.length*12 + 12;
+// Footer
+doc.setDrawColor(220); doc.line(left, y, 555, y); y+=10;
+doc.setFontSize(10); doc.setTextColor(90);
+doc.text('Salto Consultora — Acompañamos personas y equipos a gestionar mejor.', left, y); y+=12;
+doc.text('Documento generado automáticamente. No reemplaza un análisis in situ.', left, y); y+=12;
+if(user.email) doc.text(`Se envió copia a: ${user.email}`, left, y);
+// Save
+const safeCompany = (user.company || 'empresa').replace(/\s+/g,'_').toLowerCase();
+doc.save(`Informe_Autodiagnostico_${safeCompany}.pdf`);
+}
+/* Bind download */
+btnDownloadPdf.addEventListener('click', ()=> generatePDFandDownload());
+/* Initialize UI state */
+(function init(){
+dataCard.style.display='none';
+questionCard.style.display='none';
+reviewCard.style.display='none';
+resultsCard.style.display='none';
+updateProgressBar();
+})();
+</script>
+</body>
+</html>  .progress-wrap{margin-top:10px}
   .progress-track{height:8px;background:var(--borde);border-radius:6px;overflow:hidden}
   .progress-bar{height:8px;width:0%;background:linear-gradient(90deg,var(--naranja),#ffb86b);transition:width .28s ease}
 
@@ -717,4 +1346,5 @@ btnDownloadPdf.addEventListener('click', ()=> generatePDFandDownload());
 
 </body>
 </html>
+
 
